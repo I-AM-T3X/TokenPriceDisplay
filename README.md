@@ -12,7 +12,7 @@
 ## Installation
 
 1. **Download** the latest release from the [Releases](https://github.com/I-AM-T3X/TokenPriceChecker/releases) page.
-2. **Extract** the `TokenPriceChecker` folder to your World of Warcraft `Interface/AddOns` directory.
+2. **Extract** the `TokenPriceDisplay` folder to your World of Warcraft `Interface/AddOns` directory.
    - On Windows, this is typically:  
      `C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\`
    - On macOS, this is typically:  
