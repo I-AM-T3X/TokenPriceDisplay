@@ -24,7 +24,7 @@ labelText:SetText("WoW Token:")
 
 -- Create a font string to display the token price
 local priceText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-priceText:SetPoint("LEFT", labelText, "RIGHT", 6, 0)  -- Position the price text next to the label
+priceText:SetPoint("LEFT", labelText, "RIGHT", 10, 0)  -- Position the price text next to the label
 priceText:SetTextColor(1, 1, 1)  -- White color for the price
 
 -- Function to update the frame size dynamically based on content width
@@ -35,7 +35,6 @@ end
 
 -- Function to update the token price
 local function UpdateTokenPrice()
-    C_WowTokenPublic.UpdateMarketPrice()  -- Request an update of the market price
     local price = C_WowTokenPublic.GetCurrentMarketPrice()
     if price then
         priceText:SetText(GetCoinTextureString(price))  -- Set the text to the formatted price
@@ -45,15 +44,28 @@ local function UpdateTokenPrice()
     UpdateFrameSize()  -- Update the frame size based on the new content
 end
 
+-- Event handler for TOKEN_MARKET_PRICE_UPDATED
+local function OnEvent(self, event, ...)
+    if event == "TOKEN_MARKET_PRICE_UPDATED" then
+        UpdateTokenPrice()  -- Update the price when the event is fired
+    end
+end
+
+-- Register the frame to listen for events
+frame:RegisterEvent("TOKEN_MARKET_PRICE_UPDATED")
+frame:SetScript("OnEvent", OnEvent)
+
+-- Request the initial market price update
+C_WowTokenPublic.UpdateMarketPrice()
+
 -- Set up an OnUpdate handler to check the price every 5 minutes (300 seconds)
 local function OnUpdate(self, elapsed)
     self.timeSinceLastUpdate = (self.timeSinceLastUpdate or 0) + elapsed
     if self.timeSinceLastUpdate >= 300 then  -- 300 seconds = 5 minutes
-        UpdateTokenPrice()
+        C_WowTokenPublic.UpdateMarketPrice()  -- Request a new market price update every 5 minutes
         self.timeSinceLastUpdate = 0
     end
 end
 
 -- Initialize the frame
 frame:SetScript("OnUpdate", OnUpdate)
-UpdateTokenPrice()  -- Initial update when the addon is loaded
