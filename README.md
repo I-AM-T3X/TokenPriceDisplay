@@ -1,6 +1,6 @@
-# TokenPriceDisplay
+# Token Price Display
 
-**TokenPriceDisplay** is a lightweight World of Warcraft addon that displays the current WoW Token market price in a small, movable window on your screen. The addon automatically updates the token price every 5 minutes, ensuring you always have the most up-to-date information.
+**Token Price Display** is a lightweight World of Warcraft addon that displays the current WoW Token market price in a small, movable window on your screen. The addon automatically updates the token price every 5 minutes, ensuring you always have the most up-to-date information.
 
 ## Features
 
@@ -11,13 +11,11 @@
 
 ## Installation
 
-1. **Download** the latest release from the [Releases](https://github.com/I-AM-T3X/TokenPriceChecker/releases) page.
-2. **Extract** the `TokenPriceDisplay` folder to your World of Warcraft `Interface/AddOns` directory.
-   - On Windows, this is typically:  
-     `C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\`
-   - On macOS, this is typically:  
-     `/Applications/World of Warcraft/_retail_/Interface/AddOns/`
-3. **Restart** World of Warcraft or use the `/reload` command in the game to load the addon.
+1. **Download** the latest release from the [Releases](https://github.com/I-AM-T3X/TokenPriceDisplay/releases) page.
+2. **Extract** the `TokenPriceDisplay` folder to your World of Warcraft `Interface/AddOns` directory:
+   - **Windows**: `C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\`
+   - **macOS**: `/Applications/World of Warcraft/_retail_/Interface/AddOns/`
+3. **Restart** World of Warcraft or type `/reload` in the game console to load the addon.
 
 ## Usage
 
@@ -28,10 +26,31 @@
 ## Planned Features
 
 - Customization options for text size, color, and font.
+- Additional support for displaying other in-game currencies or tokens.
+
+## Changelog
+
+### v1.3 - Persistent Frame Position Across Characters
+
+- **Global Saved Variables**: Changed saved variables to global to share frame positions across all characters.
+- **Improved Frame Position Handling**: Now uses the `PLAYER_LOGIN` event to ensure the frame is positioned correctly after the UI is fully loaded.
+- **Dynamic Position Loading**: Clears and sets frame points dynamically to prevent conflicts when loading saved positions.
+- **General Code Optimization**: Enhanced overall stability and performance.
+
+### v1.2 - Event-Driven Price Updates
+
+- Added event-driven updates using `TOKEN_MARKET_PRICE_UPDATED` to ensure accurate and timely WoW Token price updates.
+- Automatically refreshes token prices upon login or UI reload.
+- Optimized the code to improve reliability and prevent outdated price information.
+
+### v1.1 - Initial Release
+
+- Live WoW Token price display with automatic updates every 5 minutes.
+- Movable and resizable window for easy customization.
 
 ## Contributing
 
-We welcome contributions from the community! If you have suggestions, encounter bugs, or want to contribute to the development of **TokenPriceChecker**, please follow these steps:
+We welcome contributions from the community! If you have suggestions, encounter bugs, or want to contribute to the development of **Token Price Display**, please follow these steps:
 
 1. **Fork** the repository.
 2. **Create a new branch**: `git checkout -b feature/YourFeatureName`.
@@ -43,7 +62,7 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ## Issues and Feedback
 
-If you find a bug or have a feature request, please report it on the [Issues](https://github.com/I-AM-T3X/TokenPriceChecker/issues) page. Your feedback is highly appreciated!
+If you find a bug or have a feature request, please report it on the [Issues](https://github.com/I-AM-T3X/TokenPriceDisplay/issues) page. Your feedback is highly appreciated!
 
 ## License
 
@@ -52,4 +71,4 @@ This addon is licensed under the MIT License. See the [LICENSE](LICENSE) file fo
 ## Acknowledgments
 
 - Thanks to the World of Warcraft community for the inspiration and support.
-- Special thanks to lightsky.gg for the suggestion to use `C_WowTokenPublic.UpdateMarketPrice()` to keep the addon up-to-date.
+- Special thanks to **LightSky.GG** for the suggestion to use `C_WowTokenPublic.UpdateMarketPrice()` to keep the addon up-to-date.
