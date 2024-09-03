@@ -1,7 +1,8 @@
 ## Interface: 110002
-## Title: Token Price Checker
-## Notes: Displays the current WoW Token price.
-## Author: I_AM_T3X
-## Version: 1.1
+## Title: Token Price Display
+## Notes: Displays the current WoW Token price in a small movable window.
+## Author: I-AM-T3X
+## Version: 1.3
+## SavedVariables: TokenPriceDisplayDB
 
 TokenPriceDisplay.lua

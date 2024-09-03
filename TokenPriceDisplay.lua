@@ -1,12 +1,42 @@
+-- Initialize the saved variable if it doesn't exist
+if not TokenPriceDisplayDB then
+    TokenPriceDisplayDB = {}
+end
+
 -- Create a frame for the addon
 local frame = CreateFrame("Frame", "TokenPriceFrame", UIParent, "BackdropTemplate")
 frame:SetSize(180, 30)  -- Initial size; this will be adjusted dynamically
-frame:SetPoint("CENTER")  -- Position it at the center of the screen
-frame:SetMovable(true)  -- Make the frame movable
-frame:EnableMouse(true)  -- Enable mouse interaction
-frame:RegisterForDrag("LeftButton")  -- Register for dragging with the left mouse button
-frame:SetScript("OnDragStart", frame.StartMoving)
-frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+
+-- Function to save the frame's position
+local function SaveFramePosition()
+    local point, _, relativePoint, xOfs, yOfs = frame:GetPoint()
+    TokenPriceDisplayDB.point = point
+    TokenPriceDisplayDB.relativePoint = relativePoint
+    TokenPriceDisplayDB.xOfs = xOfs
+    TokenPriceDisplayDB.yOfs = yOfs
+end
+
+-- Function to load the frame's position
+local function LoadFramePosition()
+    if TokenPriceDisplayDB and TokenPriceDisplayDB.point then
+        frame:ClearAllPoints()  -- Clear any existing points to avoid conflicts
+        frame:SetPoint(TokenPriceDisplayDB.point, UIParent, TokenPriceDisplayDB.relativePoint, TokenPriceDisplayDB.xOfs, TokenPriceDisplayDB.yOfs)
+    else
+        frame:SetPoint("CENTER")  -- Default position
+    end
+end
+
+-- Make the frame movable and save its position when moved
+frame:SetMovable(true)
+frame:EnableMouse(true)
+frame:RegisterForDrag("LeftButton")
+frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+frame:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+    SaveFramePosition()  -- Save the new position when the frame is moved
+end)
+
+-- Set the frame backdrop
 frame:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",  -- Background texture
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",  -- Tooltip-style border texture
@@ -48,11 +78,14 @@ end
 local function OnEvent(self, event, ...)
     if event == "TOKEN_MARKET_PRICE_UPDATED" then
         UpdateTokenPrice()  -- Update the price when the event is fired
+    elseif event == "PLAYER_LOGIN" then
+        LoadFramePosition()  -- Load the saved frame position after the player logs in
     end
 end
 
 -- Register the frame to listen for events
 frame:RegisterEvent("TOKEN_MARKET_PRICE_UPDATED")
+frame:RegisterEvent("PLAYER_LOGIN")  -- Register for PLAYER_LOGIN to ensure loading after login
 frame:SetScript("OnEvent", OnEvent)
 
 -- Request the initial market price update
