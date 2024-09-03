@@ -1,6 +1,6 @@
-# TokenPriceChecker
+# TokenPriceDisplay
 
-**TokenPriceChecker** is a lightweight World of Warcraft addon that displays the current WoW Token market price in a small, movable window on your screen. The addon automatically updates the token price every 5 minutes, ensuring you always have the most up-to-date information.
+**TokenPriceDisplay** is a lightweight World of Warcraft addon that displays the current WoW Token market price in a small, movable window on your screen. The addon automatically updates the token price every 5 minutes, ensuring you always have the most up-to-date information.
 
 ## Features
 
