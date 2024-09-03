@@ -2,6 +2,6 @@
 ## Title: Token Price Checker
 ## Notes: Displays the current WoW Token price.
 ## Author: I_AM_T3X
-## Version: 1.0
+## Version: 1.1
 
 TokenPriceDisplay.lua
