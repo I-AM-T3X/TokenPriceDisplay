@@ -83,6 +83,9 @@ end
 
 -- Function to show the color picker with proper options
 local function ShowColorPicker(colorType)
+    -- Save the original position of the ColorPickerFrame
+    local originalPoint, originalRelativeTo, originalRelativePoint, originalXOfs, originalYOfs = ColorPickerFrame:GetPoint()
+
     -- Determine which color to change
     local r, g, b, a = 1, 1, 1, 1
     if colorType == "frame" then
@@ -124,7 +127,14 @@ local function ShowColorPicker(colorType)
 
     -- Set up and show the ColorPickerFrame with the specified options
     ColorPickerFrame:SetupColorPickerAndShow(options)
+
+    -- Reset the position of the ColorPickerFrame to its original position when closed
+    ColorPickerFrame:HookScript("OnHide", function()
+        ColorPickerFrame:ClearAllPoints()
+        ColorPickerFrame:SetPoint(originalPoint, originalRelativeTo, originalRelativePoint, originalXOfs, originalYOfs)
+    end)
 end
+
 
 -- Function to update the token price
 local function UpdateTokenPrice()
@@ -170,7 +180,7 @@ frame:SetScript("OnUpdate", OnUpdate)
 
 -- Create the settings window
 local settingsFrame = CreateFrame("Frame", "TokenPriceDisplaySettingsFrame", UIParent, "BasicFrameTemplateWithInset")
-settingsFrame:SetSize(350, 350)  -- Reduced height to provide more space
+settingsFrame:SetSize(350, 350)  -- Adjust the size as needed
 settingsFrame:SetPoint("CENTER")
 settingsFrame:SetMovable(true)
 settingsFrame:EnableMouse(true)
@@ -208,6 +218,28 @@ resetButton:SetText("Reset to Default Colors")
 resetButton:SetNormalFontObject("GameFontHighlight")
 resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
 
+-- Acknowledgement Header
+local ackHeader = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+ackHeader:SetPoint("BOTTOM", settingsFrame, "BOTTOM", 0, 100)
+ackHeader:SetTextColor(1, 0.82, 0)  -- Gold color
+ackHeader:SetText("Acknowledgements")
+
+-- Acknowledgement Section
+local ackTomcat = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackTomcat:SetPoint("TOP", ackHeader, "BOTTOM", 0, -10)
+ackTomcat:SetTextColor(1, 0.82, 0)  -- Gold color
+ackTomcat:SetText("Tomcat: For your invaluable help with the API.")
+
+local ackPirateSoftware = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackPirateSoftware:SetPoint("TOP", ackTomcat, "BOTTOM", 0, -10)
+ackPirateSoftware:SetTextColor(1, 0.82, 0)  -- Gold color
+ackPirateSoftware:SetText("PirateSoftware: For encouraging me to learn coding.")
+
+local ackPersephonae = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackPersephonae:SetPoint("TOP", ackPirateSoftware, "BOTTOM", 0, -10)
+ackPersephonae:SetTextColor(1, 0.82, 0)  -- Gold color
+ackPersephonae:SetText("Persephonae: For suggesting the idea for this addon.")
+
 -- Function to toggle the settings window
 local function ToggleSettings()
     if settingsFrame:IsShown() then
@@ -227,6 +259,7 @@ SlashCmdList["TOKENPRICEDISPLAY"] = function(msg)
         print("/tpd settings - Open the settings window")
     end
 end
+
 
 -- Apply settings after frame creation
 ApplySettings()

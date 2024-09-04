@@ -30,6 +30,16 @@
 
 ## Changelog
 
+### v1.51 - Improved Color Picker Handling
+
+**Improved:**
+- **Color Picker Position Management**: The Color Picker now saves its original position when opened and resets it after use, ensuring compatibility with other addons.
+  - The Color Picker remains draggable for users, maintaining flexibility and ease of use.
+  - This prevents the Color Picker from appearing in unexpected locations if moved by another addon.
+
+**Other Minor Tweaks**:
+- Refined the `ShowColorPicker` function to handle positioning more gracefully and avoid conflicts with the UI.
+
 ### v1.5 - Enhanced Customization and Improved Color Picker
 
 **Added:**
