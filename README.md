@@ -30,6 +30,15 @@
 
 ## Changelog
 
+### TokenPriceDisplay v1.4 - Changelog
+
+**Added:**
+- **Settings Window:** A new settings window has been introduced, allowing users to customize the color of the frame to better match their UI.
+  - **Access:** Type `/tpd settings` into chat to open the settings window.
+- **Color Customization:** Users can now adjust the frame color using RGB values in the settings window.
+- **Persistent Color Settings:** The RGB color values are now saved into the global saved variables, ensuring consistent frame color across all characters.
+
+
 ### v1.3 - Persistent Frame Position Across Characters
 
 - **Global Saved Variables**: Changed saved variables to global to share frame positions across all characters.
