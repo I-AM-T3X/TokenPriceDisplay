@@ -30,6 +30,19 @@
 
 ## Changelog
 
+### v1.5 - Enhanced Customization and Improved Color Picker
+
+**Added:**
+- **Color Picker Integration**: Replaced RGB sliders with the built-in WoW `ColorPickerFrame`, allowing users to choose colors more intuitively.
+  - Users can select custom colors for the frame and text using the color picker.
+  - The selected colors update immediately and are saved to ensure consistency across sessions and characters.
+- **Improved Settings Window**: Streamlined the settings interface to make customization easier:
+  - Removed redundant RGB slider controls and replaced them with buttons to open the color picker.
+  - Adjusted the layout to ensure better spacing and alignment.
+- **Refactored Code**:
+  - Enhanced frame position and color loading functions to reduce redundancy and improve stability.
+  - Simplified event handling and initialization for better performance and maintainability.
+
 ### v1.4 - User Customization and Persistance Across Characters
 
 **Added:**
@@ -37,7 +50,6 @@
   - **Access:** Type `/tpd settings` into chat to open the settings window.
 - **Color Customization:** Users can now adjust the frame color using RGB values in the settings window.
 - **Persistent Color Settings:** The RGB color values are now saved into the global saved variables, ensuring consistent frame color across all characters.
-
 
 ### v1.3 - Persistent Frame Position Across Characters
 

@@ -1,35 +1,14 @@
 -- Initialize saved variables if they don't exist
 if not TokenPriceDisplayDB then
-    TokenPriceDisplayDB = {}
+    TokenPriceDisplayDB = {}  -- Table for saving frame position and other settings
 end
 
 if not TokenPriceDisplaySettings then
     TokenPriceDisplaySettings = {
-        frameColor = {255, 255, 255, 1},  -- Default to white using RGB 0-255
-        frameStyle = "Default"  -- Placeholder for different frame styles
+        frameColor = {1, 1, 1, 1},  -- Default to white using RGB 0-1
+        textColor = {1, 0.82, 0, 1},  -- Default to gold color
     }
 end
-
--- Create a frame for the addon
-local frame = CreateFrame("Frame", "TokenPriceFrame", UIParent, "BackdropTemplate")
-frame:SetSize(180, 30)  -- Initial size; this will be adjusted dynamically
-frame:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 16,
-    edgeSize = 12,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 }
-})
-
--- Function to apply user settings
-local function ApplySettings()
-    local r, g, b = TokenPriceDisplaySettings.frameColor[1] / 255, TokenPriceDisplaySettings.frameColor[2] / 255, TokenPriceDisplaySettings.frameColor[3] / 255
-    frame:SetBackdropBorderColor(r, g, b, 1)  -- Apply the color using 0-1 range
-end
-
--- Apply settings after frame creation
-ApplySettings()
 
 -- Function to save the frame's position
 local function SaveFramePosition()
@@ -43,12 +22,27 @@ end
 -- Function to load the frame's position
 local function LoadFramePosition()
     if TokenPriceDisplayDB and TokenPriceDisplayDB.point then
-        frame:ClearAllPoints()
+        frame:ClearAllPoints()  -- Clear all points first
         frame:SetPoint(TokenPriceDisplayDB.point, UIParent, TokenPriceDisplayDB.relativePoint, TokenPriceDisplayDB.xOfs, TokenPriceDisplayDB.yOfs)
     else
         frame:SetPoint("CENTER")  -- Default position
     end
 end
+
+-- Create the main display frame for the addon
+frame = CreateFrame("Frame", "TokenPriceFrame", UIParent, "BackdropTemplate")
+frame:SetSize(180, 30)  -- Initial size; this will be adjusted dynamically
+frame:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true,
+    tileSize = 16,
+    edgeSize = 12,
+    insets = { left = 4, right = 4, top = 4, bottom = 4 }
+})
+
+-- Call LoadFramePosition on addon load to restore the frame position
+LoadFramePosition()  -- Ensure this is called right after the frame is created
 
 -- Make the frame movable and save its position when moved
 frame:SetMovable(true)
@@ -57,35 +51,90 @@ frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    SaveFramePosition()
+    SaveFramePosition()  -- Save position when the frame stops moving
 end)
 
 -- Create a font string for the label "WoW Token:"
-local labelText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+labelText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 labelText:SetPoint("LEFT", frame, "LEFT", 10, 0)  -- Position the label on the left side
 labelText:SetTextColor(1, 0.82, 0)  -- Gold color for the text
 labelText:SetText("WoW Token:")
 
 -- Create a font string to display the token price
-local priceText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+priceText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 priceText:SetPoint("LEFT", labelText, "RIGHT", 10, 0)  -- Position the price text next to the label
 priceText:SetTextColor(1, 1, 1)  -- White color for the price
 
--- Function to update the frame size dynamically based on content width
-local function UpdateFrameSize()
-    local totalWidth = labelText:GetStringWidth() + priceText:GetStringWidth() + 30  -- Calculate total width needed for both texts
-    frame:SetWidth(totalWidth)  -- Set the frame width dynamically
+-- Function to apply user settings
+local function ApplySettings()
+    local r, g, b = TokenPriceDisplaySettings.frameColor[1], TokenPriceDisplaySettings.frameColor[2], TokenPriceDisplaySettings.frameColor[3]
+    frame:SetBackdropBorderColor(r, g, b, 1)  -- Apply the frame color using 0-1 range
+
+    local tr, tg, tb = TokenPriceDisplaySettings.textColor[1], TokenPriceDisplaySettings.textColor[2], TokenPriceDisplaySettings.textColor[3]
+    labelText:SetTextColor(tr, tg, tb)  -- Apply the text color
+end
+
+-- Function to reset colors to default
+local function ResetToDefaultColors()
+    TokenPriceDisplaySettings.frameColor = {1, 1, 1, 1}  -- Reset to white
+    TokenPriceDisplaySettings.textColor = {1, 0.82, 0, 1}  -- Reset to gold
+    ApplySettings()
+end
+
+-- Function to show the color picker with proper options
+local function ShowColorPicker(colorType)
+    -- Determine which color to change
+    local r, g, b, a = 1, 1, 1, 1
+    if colorType == "frame" then
+        r, g, b, a = unpack(TokenPriceDisplaySettings.frameColor)
+    elseif colorType == "text" then
+        r, g, b, a = unpack(TokenPriceDisplaySettings.textColor)
+    end
+
+    -- Callback function for when color changes
+    local function OnColorChanged()
+        local newR, newG, newB = ColorPickerFrame:GetColorRGB()
+        local newA = ColorPickerFrame:GetColorAlpha()
+
+        if colorType == "frame" then
+            TokenPriceDisplaySettings.frameColor = {newR, newG, newB, newA}
+        elseif colorType == "text" then
+            TokenPriceDisplaySettings.textColor = {newR, newG, newB, newA}
+        end
+
+        ApplySettings()  -- Apply the new settings
+    end
+
+    -- Callback function for when the user cancels the color selection
+    local function OnCancel()
+        print("Color Picker Canceled")
+    end
+
+    -- Options for the ColorPickerFrame
+    local options = {
+        swatchFunc = OnColorChanged,  -- Called when color is changed
+        opacityFunc = OnColorChanged,  -- Called when opacity is changed
+        cancelFunc = OnCancel,  -- Called when the user cancels the picker
+        hasOpacity = true,  -- Enable opacity slider
+        opacity = a,  -- Initial opacity
+        r = r,  -- Initial red value
+        g = g,  -- Initial green value
+        b = b,  -- Initial blue value
+    }
+
+    -- Set up and show the ColorPickerFrame with the specified options
+    ColorPickerFrame:SetupColorPickerAndShow(options)
 end
 
 -- Function to update the token price
 local function UpdateTokenPrice()
-    local price = C_WowTokenPublic.GetCurrentMarketPrice()
+    local price = C_WowTokenPublic.GetCurrentMarketPrice()  -- Get current token price in copper
     if price then
-        priceText:SetText(GetCoinTextureString(price))  -- Set the text to the formatted price
+        local formattedPrice = GetCoinTextureString(price)  -- Convert to formatted string with textures
+        priceText:SetText(formattedPrice)  -- Set the formatted price on the frame
     else
         priceText:SetText("N/A")  -- Set the text if price is not available
     end
-    UpdateFrameSize()  -- Update the frame size based on the new content
 end
 
 -- Event handler for TOKEN_MARKET_PRICE_UPDATED
@@ -93,8 +142,9 @@ local function OnEvent(self, event, ...)
     if event == "TOKEN_MARKET_PRICE_UPDATED" then
         UpdateTokenPrice()  -- Update the price when the event is fired
     elseif event == "PLAYER_LOGIN" then
-        LoadFramePosition()  -- Load the saved frame position after the player logs in
+        LoadFramePosition()  -- Ensure frame position is loaded on login
         ApplySettings()  -- Apply settings when the player logs in
+        UpdateTokenPrice()  -- Get the initial price when the player logs in
     end
 end
 
@@ -134,77 +184,35 @@ settingsFrame.title = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHi
 settingsFrame.title:SetPoint("CENTER", settingsFrame.TitleBg, "CENTER", 0, 0)
 settingsFrame.title:SetText("Token Price Display Settings")
 
--- Headline for Frame Color settings
-local frameColorTitle = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-frameColorTitle:SetPoint("TOP", settingsFrame, "TOP", 0, -60)  -- Further increased vertical spacing
-frameColorTitle:SetText("Frame Color")
+-- Button to change frame color
+local frameColorButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
+frameColorButton:SetSize(150, 30)
+frameColorButton:SetPoint("TOP", settingsFrame, "TOP", 0, -80)
+frameColorButton:SetText("Change Frame Color")
+frameColorButton:SetNormalFontObject("GameFontHighlight")
+frameColorButton:SetScript("OnClick", function() ShowColorPicker("frame") end)
 
--- Function to create a slider with an editable input field
-local function CreateColorSlider(parent, name, label, colorKey, colorIndex, y)
-    local slider = CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
-    slider:SetPoint("TOP", parent, "TOP", 0, y)  -- Centered horizontally
-    slider:SetMinMaxValues(0, 255)
-    slider:SetValueStep(1)
-    slider:SetValue(TokenPriceDisplaySettings[colorKey][colorIndex])
-    slider:SetWidth(200)  -- Wider for better alignment
+-- Button to change text color
+local textColorButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
+textColorButton:SetSize(150, 30)
+textColorButton:SetPoint("TOP", frameColorButton, "BOTTOM", 0, -20)
+textColorButton:SetText("Change Text Color")
+textColorButton:SetNormalFontObject("GameFontHighlight")
+textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
 
-    -- Change the low and high text to "0" and "255"
-    _G[name .. 'Low']:SetText('0')
-    _G[name .. 'High']:SetText('255')
-
-    -- Color label above the slider
-    local sliderLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    sliderLabel:SetPoint("TOP", slider, "TOP", 0, 15)  -- Adjusted to ensure no overlap
-    sliderLabel:SetText(label)
-
-    -- Editable input field below the slider
-    local valueInput = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
-    valueInput:SetSize(50, 20)
-    valueInput:SetPoint("TOP", slider, "BOTTOM", 0, -10)
-    valueInput:SetAutoFocus(false)
-    valueInput:SetNumeric(true)
-    valueInput:SetMaxLetters(3)
-    valueInput:SetText(tostring(TokenPriceDisplaySettings[colorKey][colorIndex]))
-
-    valueInput:SetScript("OnEnterPressed", function(self)
-        local value = tonumber(self:GetText())
-        if value and value >= 0 and value <= 255 then
-            TokenPriceDisplaySettings[colorKey][colorIndex] = value
-            slider:SetValue(value)
-            ApplySettings()
-        else
-            self:SetText(tostring(TokenPriceDisplaySettings[colorKey][colorIndex]))  -- Reset to current if invalid
-        end
-        self:ClearFocus()
-    end)
-
-    slider:SetScript("OnValueChanged", function(self, value)
-        TokenPriceDisplaySettings[colorKey][colorIndex] = value
-        valueInput:SetText(tostring(value))  -- Update the value display
-        ApplySettings()
-    end)
-
-    return slider
-end
-
--- Create RGB sliders for Frame Color, centered in the frame
-local redSlider = CreateColorSlider(settingsFrame, "RedSlider", "Red", "frameColor", 1, -100)  -- Adjusted positions to give more space
-local greenSlider = CreateColorSlider(settingsFrame, "GreenSlider", "Green", "frameColor", 2, -180)
-local blueSlider = CreateColorSlider(settingsFrame, "BlueSlider", "Blue", "frameColor", 3, -260)
-
--- Function to update the sliders and input fields with saved settings
-local function UpdateSettingsWindow()
-    redSlider:SetValue(TokenPriceDisplaySettings.frameColor[1])
-    greenSlider:SetValue(TokenPriceDisplaySettings.frameColor[2])
-    blueSlider:SetValue(TokenPriceDisplaySettings.frameColor[3])
-end
+-- Button to reset colors to default
+local resetButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
+resetButton:SetSize(150, 30)
+resetButton:SetPoint("TOP", textColorButton, "BOTTOM", 0, -20)
+resetButton:SetText("Reset to Default Colors")
+resetButton:SetNormalFontObject("GameFontHighlight")
+resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
 
 -- Function to toggle the settings window
 local function ToggleSettings()
     if settingsFrame:IsShown() then
         settingsFrame:Hide()
     else
-        UpdateSettingsWindow()  -- Update sliders to reflect saved settings before showing
         settingsFrame:Show()
     end
 end
@@ -219,3 +227,6 @@ SlashCmdList["TOKENPRICEDISPLAY"] = function(msg)
         print("/tpd settings - Open the settings window")
     end
 end
+
+-- Apply settings after frame creation
+ApplySettings()
