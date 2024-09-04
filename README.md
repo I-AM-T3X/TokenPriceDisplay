@@ -30,7 +30,7 @@
 
 ## Changelog
 
-### TokenPriceDisplay v1.4 - Changelog
+### v1.4 - User Customization and Persistance Across Characters
 
 **Added:**
 - **Settings Window:** A new settings window has been introduced, allowing users to customize the color of the frame to better match their UI.
