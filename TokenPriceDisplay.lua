@@ -210,11 +210,11 @@ textColorButton:SetText("Change Text Color")
 textColorButton:SetNormalFontObject("GameFontHighlight")
 textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
 
--- Button to reset colors to default
+-- Button to reset to default
 local resetButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
-resetButton:SetSize(150, 30)
+resetButton:SetSize(150, 30)  -- Adjust size as needed
 resetButton:SetPoint("TOP", textColorButton, "BOTTOM", 0, -20)
-resetButton:SetText("Reset to Default Colors")
+resetButton:SetText("Reset to Default")  -- Shortened text to avoid touching the edges
 resetButton:SetNormalFontObject("GameFontHighlight")
 resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
 

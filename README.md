@@ -30,6 +30,14 @@
 
 ## Changelog
 
+### v1.52 - UI Refinements and Minor Fixes
+
+**Updated:**
+- **Reset Button Label**: Shortened the "Reset to Default Colors" button text to "Reset to Default" to prevent text from touching the button frame and improve visual clarity.
+- **UI Improvements**: Minor graphical adjustments to ensure all UI elements are properly aligned and spaced within the settings window.
+
+These changes provide a cleaner, more polished user interface for better usability.
+
 ### v1.51 - Improved Color Picker Handling
 
 **Improved:**
