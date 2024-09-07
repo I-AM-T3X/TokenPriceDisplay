@@ -175,91 +175,111 @@ local function OnUpdate(self, elapsed)
     end
 end
 
--- Initialize the frame
-frame:SetScript("OnUpdate", OnUpdate)
+-- Create the main settings panel for the Interface Options
+local settingsPanel = CreateFrame("FRAME", "TokenPriceDisplaySettingsPanel", UIParent)
+settingsPanel.name = "Token Price Display"  -- Name to show in Interface Options
 
--- Create the settings window
-local settingsFrame = CreateFrame("Frame", "TokenPriceDisplaySettingsFrame", UIParent, "BasicFrameTemplateWithInset")
-settingsFrame:SetSize(350, 350)  -- Adjust the size as needed
-settingsFrame:SetPoint("CENTER")
-settingsFrame:SetMovable(true)
-settingsFrame:EnableMouse(true)
-settingsFrame:RegisterForDrag("LeftButton")
-settingsFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-settingsFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-settingsFrame:Hide()  -- Hide by default
+-- Function to initialize the panel
+local function InitializeSettingsPanel(panel)
+    -- Title for the settings panel
+    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+    title:SetText("Token Price Display Settings")
 
--- Title for the settings frame
-settingsFrame.title = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-settingsFrame.title:SetPoint("CENTER", settingsFrame.TitleBg, "CENTER", 0, 0)
-settingsFrame.title:SetText("Token Price Display Settings")
+    -- Frame Color Picker Button
+    local frameColorButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    frameColorButton:SetSize(150, 30)
+    frameColorButton:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -20)
+    frameColorButton:SetText("Change Frame Color")
+    frameColorButton:SetNormalFontObject("GameFontHighlight")
+    frameColorButton:SetScript("OnClick", function() ShowColorPicker("frame") end)
 
--- Button to change frame color
-local frameColorButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
-frameColorButton:SetSize(150, 30)
-frameColorButton:SetPoint("TOP", settingsFrame, "TOP", 0, -80)
-frameColorButton:SetText("Change Frame Color")
-frameColorButton:SetNormalFontObject("GameFontHighlight")
-frameColorButton:SetScript("OnClick", function() ShowColorPicker("frame") end)
+    -- Text Color Picker Button
+    local textColorButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    textColorButton:SetSize(150, 30)
+    textColorButton:SetPoint("TOPLEFT", frameColorButton, "BOTTOMLEFT", 0, -10)
+    textColorButton:SetText("Change Text Color")
+    textColorButton:SetNormalFontObject("GameFontHighlight")
+    textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
 
--- Button to change text color
-local textColorButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
-textColorButton:SetSize(150, 30)
-textColorButton:SetPoint("TOP", frameColorButton, "BOTTOM", 0, -20)
-textColorButton:SetText("Change Text Color")
-textColorButton:SetNormalFontObject("GameFontHighlight")
-textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
+    -- Reset to Default Button
+    local resetButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    resetButton:SetSize(150, 30)
+    resetButton:SetPoint("TOPLEFT", textColorButton, "BOTTOMLEFT", 0, -10)
+    resetButton:SetText("Reset to Default")
+    resetButton:SetNormalFontObject("GameFontHighlight")
+    resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
 
--- Button to reset to default
-local resetButton = CreateFrame("Button", nil, settingsFrame, "UIPanelButtonTemplate")
-resetButton:SetSize(150, 30)  -- Adjust size as needed
-resetButton:SetPoint("TOP", textColorButton, "BOTTOM", 0, -20)
-resetButton:SetText("Reset to Default")  -- Shortened text to avoid touching the edges
-resetButton:SetNormalFontObject("GameFontHighlight")
-resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
+    -- Acknowledgements Header
+    local ackHeader = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    ackHeader:SetPoint("TOPLEFT", resetButton, "BOTTOMLEFT", 0, -20)
+    ackHeader:SetTextColor(1, 0.82, 0)  -- Gold color
+    ackHeader:SetText("Acknowledgements")
 
--- Acknowledgement Header
-local ackHeader = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-ackHeader:SetPoint("BOTTOM", settingsFrame, "BOTTOM", 0, 100)
-ackHeader:SetTextColor(1, 0.82, 0)  -- Gold color
-ackHeader:SetText("Acknowledgements")
+    -- Individual Acknowledgements
+    local ackTomcat = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    ackTomcat:SetPoint("TOPLEFT", ackHeader, "BOTTOMLEFT", 0, -10)
+    ackTomcat:SetTextColor(1, 0.82, 0)  -- Gold color
+    ackTomcat:SetJustifyH("LEFT")
+    ackTomcat:SetText("Tomcat of Tomcat Tours: For your invaluable help with the API.")
 
--- Acknowledgement Section
-local ackTomcat = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-ackTomcat:SetPoint("TOP", ackHeader, "BOTTOM", 0, -10)
-ackTomcat:SetTextColor(1, 0.82, 0)  -- Gold color
-ackTomcat:SetText("Tomcat: For your invaluable help with the API.")
+    local ackPirateSoftware = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    ackPirateSoftware:SetPoint("TOPLEFT", ackTomcat, "BOTTOMLEFT", 0, -10)
+    ackPirateSoftware:SetTextColor(1, 0.82, 0)  -- Gold color
+    ackPirateSoftware:SetJustifyH("LEFT")
+    ackPirateSoftware:SetText("PirateSoftware: For encouraging me to learn coding.")
 
-local ackPirateSoftware = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-ackPirateSoftware:SetPoint("TOP", ackTomcat, "BOTTOM", 0, -10)
-ackPirateSoftware:SetTextColor(1, 0.82, 0)  -- Gold color
-ackPirateSoftware:SetText("PirateSoftware: For encouraging me to learn coding.")
+    local ackPersephonae = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    ackPersephonae:SetPoint("TOPLEFT", ackPirateSoftware, "BOTTOMLEFT", 0, -10)
+    ackPersephonae:SetTextColor(1, 0.82, 0)  -- Gold color
+    ackPersephonae:SetJustifyH("LEFT")
+    ackPersephonae:SetText("Persephonae: For suggesting the idea for this addon.")
+end
 
-local ackPersephonae = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-ackPersephonae:SetPoint("TOP", ackPirateSoftware, "BOTTOM", 0, -10)
-ackPersephonae:SetTextColor(1, 0.82, 0)  -- Gold color
-ackPersephonae:SetText("Persephonae: For suggesting the idea for this addon.")
+-- Initialize the settings panel
+InitializeSettingsPanel(settingsPanel)
 
--- Function to toggle the settings window
+-- Add "okay" method to apply changes
+settingsPanel.okay = function()
+    -- Save settings here if needed
+    print("Settings applied")
+end
+
+-- Add "cancel" method to revert changes
+settingsPanel.cancel = function()
+    -- Revert changes here if needed
+    print("Settings reverted")
+end
+
+-- Add "default" method to reset to default settings
+settingsPanel.default = function()
+    ResetToDefaultColors()
+    print("Settings reset to default")
+end
+
+-- Add "refresh" method to refresh settings display
+settingsPanel.refresh = function()
+    -- Refresh settings display here if needed
+    print("Settings refreshed")
+end
+
+-- Register the panel with the Interface Options using the new Settings API
+local category = Settings.RegisterCanvasLayoutCategory(settingsPanel, settingsPanel.name)
+Settings.RegisterAddOnCategory(category)
+
+-- Function to toggle the settings window and open directly to the panel
 local function ToggleSettings()
-    if settingsFrame:IsShown() then
-        settingsFrame:Hide()
-    else
-        settingsFrame:Show()
-    end
+    Settings.OpenToCategory(category:GetID())  -- Open directly to the settings panel using the category ID
 end
 
 -- Slash command to open settings
 SLASH_TOKENPRICEDISPLAY1 = "/tpd"
 SlashCmdList["TOKENPRICEDISPLAY"] = function(msg)
     if msg == "settings" then
-        ToggleSettings()
+        ToggleSettings()  -- Open the Interface Options to the settings panel
     else
         print("Token Price Display commands:")
         print("/tpd settings - Open the settings window")
     end
 end
 
-
--- Apply settings after frame creation
-ApplySettings()

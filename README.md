@@ -30,6 +30,22 @@
 
 ## Changelog
 
+## v1.53 - New Settings Integration and UI Enhancements
+
+### New Features
+- **New Settings Integration**: The settings panel is now implemented using the new `Settings` API, providing a more intuitive and seamless experience within the WoW Interface Options.
+- **Slash Command to Open Settings**: You can now use the `/tpd settings` command to open the settings panel directly, making customization quick and easy.
+
+### Improvements
+- **Refined Layout with `Settings.RegisterCanvasLayoutCategory`**: The settings panel layout has been updated to utilize `Settings.RegisterCanvasLayoutCategory` for proper registration and compatibility with the WoW settings interface.
+- **Dynamic Category Opening**: The settings panel now correctly opens to the specified category using `category:GetID()` for smooth navigation without errors.
+- **Enhanced UI Elements**: Improved button and label configurations for changing frame and text colors, as well as resetting to defaults, now fully integrated with the settings system.
+
+### Bug Fixes
+- **General Stability Enhancements**: Various code refinements have been made for stability and compatibility with the latest WoW version.
+
+Thank you for using Token Price Display! Enjoy the new and improved settings experience.
+
 ### v1.52 - UI Refinements and Minor Fixes
 
 **Updated:**
