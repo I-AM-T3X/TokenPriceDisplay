@@ -26,8 +26,6 @@
 ## Planned Features
 
 - Customization options for text size, color, and font.
-- Additional support for displaying other in-game currencies or tokens.
-
 ## Changelog
 
 ## v1.53 - New Settings Integration and UI Enhancements
