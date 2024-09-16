@@ -7,6 +7,7 @@ if not TokenPriceDisplaySettings then
     TokenPriceDisplaySettings = {
         frameColor = {1, 1, 1, 1},  -- Default to white using RGB 0-1
         textColor = {1, 0.82, 0, 1},  -- Default to gold color
+        lastKnownPrice = nil,  -- Initialize last known price
     }
 end
 
@@ -62,8 +63,23 @@ labelText:SetText("WoW Token:")
 
 -- Create a font string to display the token price
 priceText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-priceText:SetPoint("LEFT", labelText, "RIGHT", 10, 0)  -- Position the price text next to the label
+priceText:SetPoint("LEFT", labelText, "RIGHT", 5, 0)  -- Position the price text next to the label
 priceText:SetTextColor(1, 1, 1)  -- White color for the price
+
+-- Create texture for the arrow indicator
+priceIndicator = frame:CreateTexture(nil, "OVERLAY")
+priceIndicator:SetSize(16, 16)  -- Keep the size at 16x16
+priceIndicator:SetPoint("LEFT", priceText, "RIGHT", 5, 0)  -- Adjusted position to provide more space from the price text
+
+-- Function to adjust the frame size dynamically
+local function AdjustFrameSize()
+    local textWidth = priceText:GetStringWidth()  -- Get the width of the price text
+    local iconWidth = priceIndicator:IsShown() and priceIndicator:GetWidth() or 0  -- Width of the icon if shown
+    local labelWidth = labelText:GetStringWidth()  -- Width of the label text
+    local padding = 35  -- Extra padding to account for label and margins
+
+    frame:SetWidth(labelWidth + textWidth + iconWidth + padding)  -- Adjust the frame width based on text and icon
+end
 
 -- Function to apply user settings
 local function ApplySettings()
@@ -110,7 +126,7 @@ local function ShowColorPicker(colorType)
 
     -- Callback function for when the user cancels the color selection
     local function OnCancel()
-        print("Color Picker Canceled")
+        -- No action needed
     end
 
     -- Options for the ColorPickerFrame
@@ -135,15 +151,33 @@ local function ShowColorPicker(colorType)
     end)
 end
 
-
--- Function to update the token price
+-- Function to update the token price and indicator
 local function UpdateTokenPrice()
     local price = C_WowTokenPublic.GetCurrentMarketPrice()  -- Get current token price in copper
     if price then
         local formattedPrice = GetCoinTextureString(price)  -- Convert to formatted string with textures
         priceText:SetText(formattedPrice)  -- Set the formatted price on the frame
+        AdjustFrameSize()  -- Adjust frame size after setting the text
+
+        -- Use the saved price to determine the arrow indicator on login
+        if TokenPriceDisplaySettings.lastKnownPrice then
+            if price > TokenPriceDisplaySettings.lastKnownPrice then
+                priceIndicator:SetTexture("Interface\\Icons\\Misc_Arrowlup")  -- Up arrow texture
+                priceIndicator:Show()  -- Ensure the indicator is visible
+            elseif price < TokenPriceDisplaySettings.lastKnownPrice then
+                priceIndicator:SetTexture("Interface\\Icons\\Misc_Arrowdown")  -- Down arrow texture
+                priceIndicator:Show()  -- Ensure the indicator is visible
+            else
+                priceIndicator:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")  -- Red "X" texture for no change
+                priceIndicator:Show()  -- Ensure the indicator is visible
+            end
+        end
+        
+        -- Update the saved price with the current one
+        TokenPriceDisplaySettings.lastKnownPrice = price
     else
         priceText:SetText("N/A")  -- Set the text if price is not available
+        priceIndicator:Hide()  -- Hide the arrow if no price is available
     end
 end
 
@@ -174,6 +208,8 @@ local function OnUpdate(self, elapsed)
         self.timeSinceLastUpdate = 0
     end
 end
+
+frame:SetScript("OnUpdate", OnUpdate)
 
 -- Create the main settings panel for the Interface Options
 local settingsPanel = CreateFrame("FRAME", "TokenPriceDisplaySettingsPanel", UIParent)
@@ -282,4 +318,3 @@ SlashCmdList["TOKENPRICEDISPLAY"] = function(msg)
         print("/tpd settings - Open the settings window")
     end
 end
-

@@ -28,6 +28,16 @@
 - Customization options for text size, color, and font.
 ## Changelog
 
+### v1.54 - Visual Enhancements
+
+- **New Price Indicators**: Added icons to show token price changes:
+  - **Up Arrow**: `Interface\\Icons\\Misc_Arrowlup` for price increases.
+  - **Down Arrow**: `Interface\\Icons\\Misc_Arrowdown` for price decreases.
+  - **No Change**: `Interface\\Buttons\\UI-GroupLoot-Pass-Up` when the price remains the same.
+- **Cleaned Up Debug Messages**: Removed unnecessary debug print statements for a smoother experience.
+
+This update improves clarity with new visual indicators and a cleaner console.
+
 ## v1.53 - New Settings Integration and UI Enhancements
 
 ### New Features
