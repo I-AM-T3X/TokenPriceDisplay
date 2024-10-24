@@ -28,6 +28,14 @@
 - Customization options for text size, color, and font.
 ## Changelog
 
+### v1.55 - Compatibility Update
+
+### Improvements
+- **Updated Interface Version**: Updated the interface ID to 110005 to ensure compatibility with the upcoming patch 11.0.5.
+- **General Maintenance**: No major code changes; this update is to mark the addon as compatible and prevent it from being flagged as "Out of Date".
+
+Thanks for your continued use of Token Price Display
+
 ### v1.54 - Visual Enhancements
 
 - **New Price Indicators**: Added icons to show token price changes:
@@ -38,7 +46,7 @@
 
 This update improves clarity with new visual indicators and a cleaner console.
 
-## v1.53 - New Settings Integration and UI Enhancements
+### v1.53 - New Settings Integration and UI Enhancements
 
 ### New Features
 - **New Settings Integration**: The settings panel is now implemented using the new `Settings` API, providing a more intuitive and seamless experience within the WoW Interface Options.
