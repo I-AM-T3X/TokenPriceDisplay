@@ -8,6 +8,9 @@ if not TokenPriceDisplaySettings then
         frameColor = {1, 1, 1, 1},  -- Default to white using RGB 0-1
         textColor = {1, 0.82, 0, 1},  -- Default to gold color
         lastKnownPrice = nil,  -- Initialize last known price
+        displayType = "text",  -- Default to text for WoW Token display
+        showArrow = true,  -- Default to showing the price change arrow
+        iconSize = 30,  -- Default icon size
     }
 end
 
@@ -71,23 +74,61 @@ priceIndicator = frame:CreateTexture(nil, "OVERLAY")
 priceIndicator:SetSize(16, 16)  -- Keep the size at 16x16
 priceIndicator:SetPoint("LEFT", priceText, "RIGHT", 5, 0)  -- Adjusted position to provide more space from the price text
 
+-- Function to add commas to large numbers
+local function FormatNumberWithCommas(number)
+    local formatted = tostring(number):reverse():gsub("(%d%d%d)", "%1,")
+    return formatted:reverse():gsub("^,", "")
+end
+
 -- Function to adjust the frame size dynamically
 local function AdjustFrameSize()
-    local textWidth = priceText:GetStringWidth()  -- Get the width of the price text
-    local iconWidth = priceIndicator:IsShown() and priceIndicator:GetWidth() or 0  -- Width of the icon if shown
-    local labelWidth = labelText:GetStringWidth()  -- Width of the label text
-    local padding = 35  -- Extra padding to account for label and margins
+    local labelWidth = labelText:IsShown() and labelText:GetStringWidth() or 0
+    local textWidth = priceText:GetStringWidth()
+    local iconWidth = (priceIndicator:IsShown() and TokenPriceDisplaySettings.showArrow) and priceIndicator:GetWidth() or 0
+    local padding = 20  -- Reduced padding to minimize extra space
 
-    frame:SetWidth(labelWidth + textWidth + iconWidth + padding)  -- Adjust the frame width based on text and icon
+    if TokenPriceDisplaySettings.displayType == "icon" then
+        -- Adjust frame width for icon mode
+        frame:SetWidth(iconWidth + textWidth + padding)
+    else
+        -- Adjust frame width for text mode
+        frame:SetWidth(labelWidth + textWidth + iconWidth + padding + 15)
+    end
 end
 
 -- Function to apply user settings
 local function ApplySettings()
-    local r, g, b = TokenPriceDisplaySettings.frameColor[1], TokenPriceDisplaySettings.frameColor[2], TokenPriceDisplaySettings.frameColor[3]
-    frame:SetBackdropBorderColor(r, g, b, 1)  -- Apply the frame color using 0-1 range
+    local r, g, b = unpack(TokenPriceDisplaySettings.frameColor)
+    frame:SetBackdropBorderColor(r, g, b, 1)
 
-    local tr, tg, tb = TokenPriceDisplaySettings.textColor[1], TokenPriceDisplaySettings.textColor[2], TokenPriceDisplaySettings.textColor[3]
-    labelText:SetTextColor(tr, tg, tb)  -- Apply the text color
+    local tr, tg, tb = unpack(TokenPriceDisplaySettings.textColor)
+    labelText:SetTextColor(tr, tg, tb)
+
+    if TokenPriceDisplaySettings.displayType == "icon" then
+        labelText:Hide()
+        priceIndicator:SetTexture("Interface\\Icons\\wow_token01")  -- Use WoW Token icon
+        priceIndicator:SetSize(TokenPriceDisplaySettings.iconSize, TokenPriceDisplaySettings.iconSize)
+        priceIndicator:SetPoint("LEFT", frame, "LEFT", 5, 0)
+        priceText:ClearAllPoints()
+        priceText:SetPoint("LEFT", priceIndicator, "RIGHT", 5, 0)  -- Reduce space between icon and text
+        priceIndicator:Show()
+    else
+        labelText:SetText("WoW Token:")
+        labelText:Show()
+        priceText:ClearAllPoints()
+        priceText:SetPoint("LEFT", labelText, "RIGHT", 5, 0)
+        priceIndicator:ClearAllPoints()
+        priceIndicator:SetPoint("LEFT", priceText, "RIGHT", 5, 0)
+    end
+
+    -- Show or hide the price change arrow
+    if TokenPriceDisplaySettings.showArrow then
+        priceIndicator:Show()
+    else
+        priceIndicator:Hide()
+    end
+
+    AdjustFrameSize()
 end
 
 -- Function to reset colors to default
@@ -97,12 +138,8 @@ local function ResetToDefaultColors()
     ApplySettings()
 end
 
--- Function to show the color picker with proper options
+-- Function to show the color picker for frame or text color
 local function ShowColorPicker(colorType)
-    -- Save the original position of the ColorPickerFrame
-    local originalPoint, originalRelativeTo, originalRelativePoint, originalXOfs, originalYOfs = ColorPickerFrame:GetPoint()
-
-    -- Determine which color to change
     local r, g, b, a = 1, 1, 1, 1
     if colorType == "frame" then
         r, g, b, a = unpack(TokenPriceDisplaySettings.frameColor)
@@ -110,10 +147,9 @@ local function ShowColorPicker(colorType)
         r, g, b, a = unpack(TokenPriceDisplaySettings.textColor)
     end
 
-    -- Callback function for when color changes
     local function OnColorChanged()
         local newR, newG, newB = ColorPickerFrame:GetColorRGB()
-        local newA = ColorPickerFrame:GetColorAlpha()
+        local newA = ColorPickerFrame:GetColorAlpha() or 1
 
         if colorType == "frame" then
             TokenPriceDisplaySettings.frameColor = {newR, newG, newB, newA}
@@ -121,198 +157,198 @@ local function ShowColorPicker(colorType)
             TokenPriceDisplaySettings.textColor = {newR, newG, newB, newA}
         end
 
-        ApplySettings()  -- Apply the new settings
+        ApplySettings()
     end
 
-    -- Callback function for when the user cancels the color selection
     local function OnCancel()
-        -- No action needed
+        ApplySettings()  -- Revert to previous settings if the user cancels
     end
 
-    -- Options for the ColorPickerFrame
+    -- Set up options for the color picker
     local options = {
-        swatchFunc = OnColorChanged,  -- Called when color is changed
-        opacityFunc = OnColorChanged,  -- Called when opacity is changed
-        cancelFunc = OnCancel,  -- Called when the user cancels the picker
-        hasOpacity = true,  -- Enable opacity slider
-        opacity = a,  -- Initial opacity
-        r = r,  -- Initial red value
-        g = g,  -- Initial green value
-        b = b,  -- Initial blue value
+        swatchFunc = OnColorChanged,
+        opacityFunc = OnColorChanged,
+        cancelFunc = OnCancel,
+        hasOpacity = true,
+        opacity = a,
+        r = r,
+        g = g,
+        b = b,
     }
 
-    -- Set up and show the ColorPickerFrame with the specified options
+    -- Use the custom setup function to display the color picker
     ColorPickerFrame:SetupColorPickerAndShow(options)
-
-    -- Reset the position of the ColorPickerFrame to its original position when closed
-    ColorPickerFrame:HookScript("OnHide", function()
-        ColorPickerFrame:ClearAllPoints()
-        ColorPickerFrame:SetPoint(originalPoint, originalRelativeTo, originalRelativePoint, originalXOfs, originalYOfs)
-    end)
 end
 
 -- Function to update the token price and indicator
 local function UpdateTokenPrice()
-    local price = C_WowTokenPublic.GetCurrentMarketPrice()  -- Get current token price in copper
+    local price = C_WowTokenPublic.GetCurrentMarketPrice()
     if price then
-        local formattedPrice = GetCoinTextureString(price)  -- Convert to formatted string with textures
-        priceText:SetText(formattedPrice)  -- Set the formatted price on the frame
+        local formattedPrice = GetCoinTextureString(price)
+        priceText:SetText(FormatNumberWithCommas(formattedPrice))
         AdjustFrameSize()  -- Adjust frame size after setting the text
 
-        -- Use the saved price to determine the arrow indicator on login
         if TokenPriceDisplaySettings.lastKnownPrice then
             if price > TokenPriceDisplaySettings.lastKnownPrice then
-                priceIndicator:SetTexture("Interface\\Icons\\Misc_Arrowlup")  -- Up arrow texture
-                priceIndicator:Show()  -- Ensure the indicator is visible
+                priceIndicator:SetTexture("Interface\\Icons\\wow_token01")
+                priceIndicator:SetSize(TokenPriceDisplaySettings.iconSize, TokenPriceDisplaySettings.iconSize)
+                priceIndicator:Show()
             elseif price < TokenPriceDisplaySettings.lastKnownPrice then
-                priceIndicator:SetTexture("Interface\\Icons\\Misc_Arrowdown")  -- Down arrow texture
-                priceIndicator:Show()  -- Ensure the indicator is visible
+                priceIndicator:SetTexture("Interface\\Icons\\wow_token02")
+                priceIndicator:SetSize(TokenPriceDisplaySettings.iconSize, TokenPriceDisplaySettings.iconSize)
+                priceIndicator:Show()
             else
-                priceIndicator:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")  -- Red "X" texture for no change
-                priceIndicator:Show()  -- Ensure the indicator is visible
+                priceIndicator:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+                priceIndicator:Show()
             end
         end
-        
-        -- Update the saved price with the current one
+
         TokenPriceDisplaySettings.lastKnownPrice = price
     else
-        priceText:SetText("N/A")  -- Set the text if price is not available
-        priceIndicator:Hide()  -- Hide the arrow if no price is available
+        priceText:SetText("N/A")
+        priceIndicator:Hide()
     end
 end
 
 -- Event handler for TOKEN_MARKET_PRICE_UPDATED
 local function OnEvent(self, event, ...)
     if event == "TOKEN_MARKET_PRICE_UPDATED" then
-        UpdateTokenPrice()  -- Update the price when the event is fired
+        UpdateTokenPrice()
     elseif event == "PLAYER_LOGIN" then
-        LoadFramePosition()  -- Ensure frame position is loaded on login
-        ApplySettings()  -- Apply settings when the player logs in
-        UpdateTokenPrice()  -- Get the initial price when the player logs in
+        LoadFramePosition()
+        ApplySettings()
+        UpdateTokenPrice()
     end
 end
 
 -- Register the frame to listen for events
 frame:RegisterEvent("TOKEN_MARKET_PRICE_UPDATED")
-frame:RegisterEvent("PLAYER_LOGIN")  -- Register for PLAYER_LOGIN to ensure loading after login
+frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", OnEvent)
 
 -- Request the initial market price update
 C_WowTokenPublic.UpdateMarketPrice()
 
--- Set up an OnUpdate handler to check the price every 5 minutes (300 seconds)
+-- Set up an OnUpdate handler
 local function OnUpdate(self, elapsed)
     self.timeSinceLastUpdate = (self.timeSinceLastUpdate or 0) + elapsed
-    if self.timeSinceLastUpdate >= 300 then  -- 300 seconds = 5 minutes
-        C_WowTokenPublic.UpdateMarketPrice()  -- Request a new market price update every 5 minutes
+    if self.timeSinceLastUpdate >= 300 then
+        C_WowTokenPublic.UpdateMarketPrice()
         self.timeSinceLastUpdate = 0
     end
 end
 
 frame:SetScript("OnUpdate", OnUpdate)
 
--- Create the main settings panel for the Interface Options
+-- Settings Panel for Interface Options
 local settingsPanel = CreateFrame("FRAME", "TokenPriceDisplaySettingsPanel", UIParent)
-settingsPanel.name = "Token Price Display"  -- Name to show in Interface Options
+settingsPanel.name = "Token Price Display"
+settingsPanel:SetSize(400, 500)
 
--- Function to initialize the panel
-local function InitializeSettingsPanel(panel)
-    -- Title for the settings panel
-    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText("Token Price Display Settings")
+local title = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+title:SetPoint("TOPLEFT", 16, -16)
+title:SetText("Token Price Display Settings")
 
-    -- Frame Color Picker Button
-    local frameColorButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    frameColorButton:SetSize(150, 30)
-    frameColorButton:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -20)
-    frameColorButton:SetText("Change Frame Color")
-    frameColorButton:SetNormalFontObject("GameFontHighlight")
-    frameColorButton:SetScript("OnClick", function() ShowColorPicker("frame") end)
+-- Frame Color Picker Button
+local frameColorButton = CreateFrame("Button", nil, settingsPanel, "UIPanelButtonTemplate")
+frameColorButton:SetSize(150, 30)
+frameColorButton:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -20)
+frameColorButton:SetText("Change Frame Color")
+frameColorButton:SetNormalFontObject("GameFontHighlight")
+frameColorButton:SetScript("OnClick", function() ShowColorPicker("frame") end)
 
-    -- Text Color Picker Button
-    local textColorButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    textColorButton:SetSize(150, 30)
-    textColorButton:SetPoint("TOPLEFT", frameColorButton, "BOTTOMLEFT", 0, -10)
-    textColorButton:SetText("Change Text Color")
-    textColorButton:SetNormalFontObject("GameFontHighlight")
-    textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
+-- Text Color Picker Button
+local textColorButton = CreateFrame("Button", nil, settingsPanel, "UIPanelButtonTemplate")
+textColorButton:SetSize(150, 30)
+textColorButton:SetPoint("TOPLEFT", frameColorButton, "BOTTOMLEFT", 0, -10)
+textColorButton:SetText("Change Text Color")
+textColorButton:SetNormalFontObject("GameFontHighlight")
+textColorButton:SetScript("OnClick", function() ShowColorPicker("text") end)
 
-    -- Reset to Default Button
-    local resetButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    resetButton:SetSize(150, 30)
-    resetButton:SetPoint("TOPLEFT", textColorButton, "BOTTOMLEFT", 0, -10)
-    resetButton:SetText("Reset to Default")
-    resetButton:SetNormalFontObject("GameFontHighlight")
-    resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
+-- Reset to Default Button
+local resetButton = CreateFrame("Button", nil, settingsPanel, "UIPanelButtonTemplate")
+resetButton:SetSize(150, 30)
+resetButton:SetPoint("TOPLEFT", textColorButton, "BOTTOMLEFT", 0, -10)
+resetButton:SetText("Reset to Default")
+resetButton:SetNormalFontObject("GameFontHighlight")
+resetButton:SetScript("OnClick", function() ResetToDefaultColors() end)
 
-    -- Acknowledgements Header
-    local ackHeader = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    ackHeader:SetPoint("TOPLEFT", resetButton, "BOTTOMLEFT", 0, -20)
-    ackHeader:SetTextColor(1, 0.82, 0)  -- Gold color
-    ackHeader:SetText("Acknowledgements")
+-- Display Type Checkbox
+local displayTypeCheckbox = CreateFrame("CheckButton", nil, settingsPanel, "InterfaceOptionsCheckButtonTemplate")
+displayTypeCheckbox:SetPoint("TOPLEFT", resetButton, "BOTTOMLEFT", 0, -20)
+displayTypeCheckbox.Text:SetText("Use Icon for WoW Token Display")
+displayTypeCheckbox:SetChecked(TokenPriceDisplaySettings.displayType == "icon")
+displayTypeCheckbox:SetScript("OnClick", function(self)
+    TokenPriceDisplaySettings.displayType = self:GetChecked() and "icon" or "text"
+    ApplySettings()
+end)
 
-    -- Individual Acknowledgements
-    local ackTomcat = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    ackTomcat:SetPoint("TOPLEFT", ackHeader, "BOTTOMLEFT", 0, -10)
-    ackTomcat:SetTextColor(1, 0.82, 0)  -- Gold color
-    ackTomcat:SetJustifyH("LEFT")
-    ackTomcat:SetText("Tomcat of Tomcat Tours: For your invaluable help with the API.")
+-- Arrow Visibility Checkbox
+local arrowCheckbox = CreateFrame("CheckButton", nil, settingsPanel, "InterfaceOptionsCheckButtonTemplate")
+arrowCheckbox:SetPoint("TOPLEFT", displayTypeCheckbox, "BOTTOMLEFT", 0, -20)
+arrowCheckbox.Text:SetText("Show Price Change Arrow")
+arrowCheckbox:SetChecked(TokenPriceDisplaySettings.showArrow)
+arrowCheckbox:SetScript("OnClick", function(self)
+    TokenPriceDisplaySettings.showArrow = self:GetChecked()
+    ApplySettings()
+end)
 
-    local ackPirateSoftware = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    ackPirateSoftware:SetPoint("TOPLEFT", ackTomcat, "BOTTOMLEFT", 0, -10)
-    ackPirateSoftware:SetTextColor(1, 0.82, 0)  -- Gold color
-    ackPirateSoftware:SetJustifyH("LEFT")
-    ackPirateSoftware:SetText("PirateSoftware: For encouraging me to learn coding.")
+-- Icon Size Slider
+local iconSizeSlider = CreateFrame("Slider", nil, settingsPanel, "OptionsSliderTemplate")
+iconSizeSlider:SetOrientation('HORIZONTAL')
+iconSizeSlider:SetSize(200, 15)
+iconSizeSlider:SetPoint("TOPLEFT", arrowCheckbox, "BOTTOMLEFT", 0, -40)
+iconSizeSlider:SetMinMaxValues(10, 50)
+iconSizeSlider:SetValue(TokenPriceDisplaySettings.iconSize)
+iconSizeSlider:SetValueStep(1)
+iconSizeSlider.Text = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+iconSizeSlider.Text:SetPoint("TOP", iconSizeSlider, "BOTTOM", 0, -5)
+iconSizeSlider.Text:SetText("Icon Size: " .. TokenPriceDisplaySettings.iconSize)
+iconSizeSlider:SetScript("OnValueChanged", function(self, value)
+    value = math.floor(value + 0.5)
+    TokenPriceDisplaySettings.iconSize = value
+    iconSizeSlider.Text:SetText("Icon Size: " .. value)
+    ApplySettings()
+end)
 
-    local ackPersephonae = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    ackPersephonae:SetPoint("TOPLEFT", ackPirateSoftware, "BOTTOMLEFT", 0, -10)
-    ackPersephonae:SetTextColor(1, 0.82, 0)  -- Gold color
-    ackPersephonae:SetJustifyH("LEFT")
-    ackPersephonae:SetText("Persephonae: For suggesting the idea for this addon.")
-end
+-- Acknowledgements Header
+local ackHeader = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+ackHeader:SetPoint("TOPLEFT", iconSizeSlider, "BOTTOMLEFT", 0, -20)
+ackHeader:SetTextColor(1, 0.82, 0)  -- Gold color
+ackHeader:SetText("Acknowledgements")
 
--- Initialize the settings panel
-InitializeSettingsPanel(settingsPanel)
+-- Individual Acknowledgements
+local ackTomcat = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackTomcat:SetPoint("TOPLEFT", ackHeader, "BOTTOMLEFT", 0, -10)
+ackTomcat:SetTextColor(1, 0.82, 0)  -- Gold color
+ackTomcat:SetJustifyH("LEFT")
+ackTomcat:SetText("Tomcat of Tomcat Tours: For your invaluable help with the API.")
 
--- Add "okay" method to apply changes
-settingsPanel.okay = function()
-    -- Save settings here if needed
-    print("Settings applied")
-end
+local ackPirateSoftware = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackPirateSoftware:SetPoint("TOPLEFT", ackTomcat, "BOTTOMLEFT", 0, -10)
+ackPirateSoftware:SetTextColor(1, 0.82, 0)  -- Gold color
+ackPirateSoftware:SetJustifyH("LEFT")
+ackPirateSoftware:SetText("PirateSoftware: For encouraging me to learn coding.")
 
--- Add "cancel" method to revert changes
-settingsPanel.cancel = function()
-    -- Revert changes here if needed
-    print("Settings reverted")
-end
+local ackPersephonae = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+ackPersephonae:SetPoint("TOPLEFT", ackPirateSoftware, "BOTTOMLEFT", 0, -10)
+ackPersephonae:SetTextColor(1, 0.82, 0)  -- Gold color
+ackPersephonae:SetJustifyH("LEFT")
+ackPersephonae:SetText("Persephonae: For suggesting the idea for this addon.")
 
--- Add "default" method to reset to default settings
-settingsPanel.default = function()
-    ResetToDefaultColors()
-    print("Settings reset to default")
-end
-
--- Add "refresh" method to refresh settings display
-settingsPanel.refresh = function()
-    -- Refresh settings display here if needed
-    print("Settings refreshed")
-end
-
--- Register the panel with the Interface Options using the new Settings API
+-- Register the panel with the Interface Options
 local category = Settings.RegisterCanvasLayoutCategory(settingsPanel, settingsPanel.name)
 Settings.RegisterAddOnCategory(category)
 
--- Function to toggle the settings window and open directly to the panel
 local function ToggleSettings()
-    Settings.OpenToCategory(category:GetID())  -- Open directly to the settings panel using the category ID
+    Settings.OpenToCategory(category:GetID())
 end
 
 -- Slash command to open settings
 SLASH_TOKENPRICEDISPLAY1 = "/tpd"
 SlashCmdList["TOKENPRICEDISPLAY"] = function(msg)
     if msg == "settings" then
-        ToggleSettings()  -- Open the Interface Options to the settings panel
+        ToggleSettings()
     else
         print("Token Price Display commands:")
         print("/tpd settings - Open the settings window")

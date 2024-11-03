@@ -28,6 +28,16 @@
 - Customization options for text size, color, and font.
 ## Changelog
 
+### v1.56 - Customization and Display Enhancements
+
+### New Features and Improvements
+- **Dynamic Resizing Based on Arrow Visibility**: The frame now dynamically resizes depending on whether the price change arrow is shown or hidden, keeping numbers centered and properly aligned.
+- **Icon and Text Display Toggle**: Added a checkbox in the settings panel for toggling between an icon or text for the WoW Token label. The chosen setting is saved across sessions for a consistent experience.
+- **Improved Layout Adjustments**: Refined the layout function to adjust positioning based on display type (icon or text) and arrow visibility, ensuring optimal spacing and alignment.
+- **Persistent Settings Across Sessions**: Ensured user preferences for display type and arrow visibility are saved and loaded correctly, making the layout and options consistent across reloads.
+
+Thanks for your continued support and feedback to improve Token Price Display!
+
 ### v1.55 - Compatibility Update
 
 ### Improvements

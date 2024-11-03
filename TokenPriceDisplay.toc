@@ -2,7 +2,7 @@
 ## Title: Token Price Display
 ## Notes: Displays the current WoW Token price in a small movable window.
 ## Author: I-AM-T3X
-## Version: 1.55
+## Version: 1.56
 ## SavedVariables: TokenPriceDisplayDB, TokenPriceDisplaySettings
 
 TokenPriceDisplay.lua
