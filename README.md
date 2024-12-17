@@ -28,6 +28,13 @@
 - Customization options for text size, color, and font.
 ## Changelog
 
+### **Token Price Display Changelog**
+
+#### **Version 1.57**  
+**Bug Fixes**:  
+- Fixed an issue where `SetSize` caused an error due to a `nil` value for `TokenPriceDisplaySettings.iconSize`.  
+- Added a fallback value of `30` to ensure `SetSize` always receives a valid argument.  
+
 ### v1.56 - Customization and Display Enhancements
 
 ### New Features and Improvements
