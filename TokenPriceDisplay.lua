@@ -103,6 +103,8 @@ local function ApplySettings()
 
     local tr, tg, tb = unpack(TokenPriceDisplaySettings.textColor)
     labelText:SetTextColor(tr, tg, tb)
+	
+	local iconSize = TokenPriceDisplaySettings.iconSize or 30  -- Fallback to 30 if nil
 
     if TokenPriceDisplaySettings.displayType == "icon" then
         labelText:Hide()
@@ -180,29 +182,28 @@ local function ShowColorPicker(colorType)
     ColorPickerFrame:SetupColorPickerAndShow(options)
 end
 
--- Function to update the token price and indicator
 local function UpdateTokenPrice()
     local price = C_WowTokenPublic.GetCurrentMarketPrice()
+    local iconSize = TokenPriceDisplaySettings.iconSize or 30  -- Fallback to 30 if nil
+
     if price then
         local formattedPrice = GetCoinTextureString(price)
         priceText:SetText(FormatNumberWithCommas(formattedPrice))
-        AdjustFrameSize()  -- Adjust frame size after setting the text
+        AdjustFrameSize()
 
         if TokenPriceDisplaySettings.lastKnownPrice then
             if price > TokenPriceDisplaySettings.lastKnownPrice then
                 priceIndicator:SetTexture("Interface\\Icons\\wow_token01")
-                priceIndicator:SetSize(TokenPriceDisplaySettings.iconSize, TokenPriceDisplaySettings.iconSize)
-                priceIndicator:Show()
+                priceIndicator:SetSize(iconSize, iconSize)
             elseif price < TokenPriceDisplaySettings.lastKnownPrice then
                 priceIndicator:SetTexture("Interface\\Icons\\wow_token02")
-                priceIndicator:SetSize(TokenPriceDisplaySettings.iconSize, TokenPriceDisplaySettings.iconSize)
-                priceIndicator:Show()
+                priceIndicator:SetSize(iconSize, iconSize)
             else
                 priceIndicator:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
-                priceIndicator:Show()
+                priceIndicator:SetSize(iconSize, iconSize)
             end
         end
-
+        priceIndicator:Show()
         TokenPriceDisplaySettings.lastKnownPrice = price
     else
         priceText:SetText("N/A")
