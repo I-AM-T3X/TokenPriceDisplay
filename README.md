@@ -30,6 +30,37 @@
 
 ### **Token Price Display Changelog**
 
+#### **Version 1.58**  
+
+### New Features  
+- **Price Alerts Toggle**:  
+  - Added a checkbox in settings to enable or disable price alerts.  
+  - Alerts will only trigger when enabled.  
+  - Users will receive a confirmation message when toggling alerts on or off.  
+
+- **Icon & Arrow Toggles**:  
+  - Users can now choose between icon or text for the WoW Token display.  
+  - Added an option to enable/disable the price change arrow.  
+
+### Fixes & Improvements  
+- **Saved Variables Loading Properly**:  
+  - Moved all settings initialization to `ADDON_LOADED` to ensure saved values are used instead of defaults.  
+  - Fixed an issue where settings were reset due to premature initialization.  
+
+- **Frame Position Saving & Loading**:  
+  - Fixed a bug where the frame wasn’t saving its position correctly.  
+  - The frame now properly loads its last position on login.  
+
+- **Input Box Fix for Buy/Sell Alerts**:  
+  - Fixed an issue where saved alert prices were not appearing in the input boxes.  
+  - Input fields now correctly display saved values on login.  
+  - Converted input values to strings before displaying to prevent UI errors.  
+
+- **General Code Optimization**:  
+  - Ensured functions run in the correct order to avoid conflicts.  
+  - Improved error handling for invalid price inputs in settings.  
+  - Added debug messages to track settings changes and saved positions.
+
 #### **Version 1.57**  
 **Bug Fixes**:  
 - Fixed an issue where `SetSize` caused an error due to a `nil` value for `TokenPriceDisplaySettings.iconSize`.  
