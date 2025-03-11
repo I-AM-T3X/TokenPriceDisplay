@@ -188,9 +188,9 @@ local function UpdateTokenPrice()
 
         if TokenPriceDisplaySettings.lastKnownPrice then
             if goldPrice > TokenPriceDisplaySettings.lastKnownPrice then
-                priceIndicator:SetTexture("Interface\\Icons\\wow_token01")  -- Arrow up
+                priceIndicator:SetTexture("Interface\\Icons\\wow_token01")  -- 🔹 Arrow up
             elseif goldPrice < TokenPriceDisplaySettings.lastKnownPrice then
-                priceIndicator:SetTexture("Interface\\Icons\\wow_token02")  -- Arrow down
+                priceIndicator:SetTexture("Interface\\Icons\\wow_token02")  -- 🔹 Arrow down
             else
                 priceIndicator:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")  -- No change
             end
@@ -341,7 +341,7 @@ end
 -- Event handler for TOKEN_MARKET_PRICE_UPDATED
 local function OnEvent(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "TokenPriceDisplay" then
-        -- Ensure saved variables exist after addon is loaded
+        -- Load saved settings
         TokenPriceDisplayDB = TokenPriceDisplayDB or {}
         TokenPriceDisplaySettings = TokenPriceDisplaySettings or {
             frameColor = {0.949, 1, 0, 1},
@@ -361,6 +361,8 @@ local function OnEvent(self, event, arg1)
 
         -- ✅ Now that saved variables are loaded, create the settings panel
         CreateSettingsPanel()
+    elseif event == "TOKEN_MARKET_PRICE_UPDATED" then
+        UpdateTokenPrice()
     elseif event == "PLAYER_LOGIN" then
         LoadFramePosition()
         ApplySettings()
@@ -388,8 +390,11 @@ C_WowTokenPublic.UpdateMarketPrice()
 local updateTimer = 0
 frame:SetScript("OnUpdate", function(_, elapsed)
     updateTimer = updateTimer + elapsed
-    if updateTimer >= 300 then
+    if updateTimer >= 300 then  -- ⏳ Updating every 1 min
         C_WowTokenPublic.UpdateMarketPrice()
+        C_Timer.After(2, function()  -- 🔹 Wait 2 seconds before updating display
+            UpdateTokenPrice()
+        end)
         updateTimer = 0
     end
 end)

@@ -30,6 +30,11 @@
 
 ### **Token Price Display Changelog**
 
+#### **Version 1.59**
+
+### ✅ Token Price Display Now Updates Correctly
+- Fixed an issue where the token price **was not updating in real-time** after a market price update.
+
 #### **Version 1.58**  
 
 ### New Features  
